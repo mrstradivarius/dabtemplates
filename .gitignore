@@ -1,0 +1,11 @@
+# Python bytecode
+__pycache__
+
+# Pywikibot files
+apicache-py3/
+logs/
+pywikibot-*.lwp
+throttle.ctrl
+
+# Secrets
+user-password.py
