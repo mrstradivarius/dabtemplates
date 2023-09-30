@@ -7,5 +7,7 @@ logs/
 pywikibot-*.lwp
 throttle.ctrl
 
-# Secrets
+# Pywikibot config/secrets
+# Note: user-config.py can contain OAuth secrets
+user-config.py
 user-password.py
