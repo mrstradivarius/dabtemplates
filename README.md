@@ -1,14 +1,7 @@
-# Dabtemplates
+# StradBot
 
-A Pywikibot script to generate a Lua table of disambiguation templates and
-their redirects. It is intended to populate
-[Module:Disambiguation/templates](https://en.wikipedia.org/wiki/Module:Disambiguation/templates)
-on the English Wikipedia.
-
-The script iterates through a category of disambiguation templates. For all
-templates that are not in an exclusion list, the script adds the template and
-all its redirects to a Lua table, and then writes that table to the target Lua
-module page.
+A Pywikibot bot operated by
+[Mr. Stradivarius](https://en.wikipedia.org/wiki/User:Mr._Stradivarius).
 
 ## Installation
 
@@ -28,13 +21,13 @@ Make sure the following software is installed on your computer:
 
 
 ```bash
-git clone https://github.com/mrstradivarius/dabtemplates.git 
+git clone https://github.com/mrstradivarius/stradbot.git 
 ```
 
 2. Enter the project directory.
 
 ```bash
-cd dabtemplates
+cd stradbot
 ```
 
 3. Install dependencies
@@ -43,12 +36,36 @@ cd dabtemplates
 poetry install
 ```
 
-## Usage
+4. Generate Pywikibot config files
+
+```bash
+poetry run pwb generate_user_files.py
+```
+
+5. Log in (not needed if using OAuth)
+
+```bash
+poetry run pwb login.py
+```
+
+## Tasks
+
+### Dabtemplates
+
+Generate a Lua table of disambiguation templates and their redirects. It is
+intended to populate
+[Module:Disambiguation/templates](https://en.wikipedia.org/wiki/Module:Disambiguation/templates)
+on the English Wikipedia.
+
+The script iterates through a category of disambiguation templates. For all
+templates that are not in an exclusion list, the script adds the template and
+all its redirects to a Lua table, and then writes that table to the target Lua
+module page.
 
 Usage:
 
 ```bash
-python -m dabtemplates [options]
+poetry run python -m stradbot.dabtemplates [options]
 ```
 
 This script provides the following options:
@@ -66,4 +83,5 @@ This script provides the following options:
 - `-summary:<edit summary>`: The edit summary to use when saving the data page.
   By default, this is "Bot: update disambiguation template list".
 
-In addition, you can use the [global Pywikibot options](https://www.mediawiki.org/wiki/Manual:Pywikibot/Global_Options).
+In addition, you can use the
+[global Pywikibot options](https://www.mediawiki.org/wiki/Manual:Pywikibot/Global_Options).

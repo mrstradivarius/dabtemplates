@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "dabtemplates"
+name = "stradbot"
 version = "0.1.0"
 description = ""
 authors = ["Mr. Stradivarius <misterstrad@gmail.com>"]
