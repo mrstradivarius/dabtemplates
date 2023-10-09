@@ -80,6 +80,11 @@ def format_edit_request_text(
     )
 
 
+def is_content_equal(content1, content2):
+    """Compare page content, ignoring final whitespace."""
+    return content1.rstrip() == content2.rstrip()
+
+
 def main():
     logging.info(f"Start dabtemplates task")
     options = parse_options()
@@ -99,8 +104,10 @@ def main():
     # Check if the module sandbox content would change, and exit if not
     data_page_sandbox = pywikibot.Page(site, title=options["data-page-sandbox"])
     logging.info(f"Check if {data_page_sandbox} content needs updating")
-    if data_page_sandbox.text == data_page_content:
-        logging.info(f"Content of {data_page_sandbox} would not change; skip saving page")
+    if is_content_equal(data_page_sandbox.text, data_page_content):
+        logging.info(
+            f"Content of {data_page_sandbox} would not change; skip saving page"
+        )
         return
 
     # Save the new module content
@@ -109,7 +116,7 @@ def main():
     # Check if the module content would change, and exit if not
     data_page = pywikibot.Page(site, title=options["data-page"])
     logging.info(f"Check if {data_page} content needs updating")
-    if data_page.text == data_page_content:
+    if is_content_equal(data_page.text, data_page_content):
         logging.info(
             f"Content of {data_page} is identical to new sandbox content; "
             f"skip adding edit request"
