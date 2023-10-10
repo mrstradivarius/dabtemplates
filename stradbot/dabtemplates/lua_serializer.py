@@ -31,6 +31,13 @@ LUA_RESTRICTED_TOKENS = {
 }
 
 
+class TableType(Enum):
+    """The type of a Lua table."""
+
+    SEQUENCE = auto()  # Example: {"value1", "value2"}
+    KEY_VALUE = auto()  # Example: {key1 = "value1", key2 = "value2"}
+
+
 class TableKeyFormat(Enum):
     """The format of a table key."""
 
@@ -80,6 +87,8 @@ def add_lua_sequence(
     min_single_line_indent_level,
     table_sort_key,
     table_keys,
+    table_item_prepend,
+    table_item_append,
 ):
     one_line = is_one_line(
         obj,
@@ -89,6 +98,7 @@ def add_lua_sequence(
     next_indent_level = indent_level + 1
     ret.append("{")
     for i, item in enumerate(obj):
+        ret.append(table_item_prepend(TableType.SEQUENCE, None, item, i))
         if not one_line:
             ret.append("\n")
             ret += [indent] * next_indent_level
@@ -100,11 +110,14 @@ def add_lua_sequence(
             min_single_line_indent_level=min_single_line_indent_level,
             table_sort_key=table_sort_key,
             table_keys=table_keys,
+            table_item_prepend=table_item_prepend,
+            table_item_append=table_item_append,
         )
         if not one_line:
             ret.append(",")
         elif i < len(obj) - 1:
             ret.append(", ")
+        ret.append(table_item_append(TableType.SEQUENCE, None, item, i))
     if not one_line:
         ret.append("\n")
         ret += [indent] * indent_level
@@ -120,6 +133,8 @@ def add_lua_table(
     min_single_line_indent_level,
     table_sort_key,
     table_keys,
+    table_item_prepend,
+    table_item_append,
 ):
     one_line = is_one_line(
         obj,
@@ -132,6 +147,7 @@ def add_lua_table(
     if table_sort_key is not None:
         props = sorted(props, key=table_sort_key)
     for i, prop in enumerate(props):
+        ret.append(table_item_prepend(TableType.KEY_VALUE, prop, obj[prop], i))
         if not one_line:
             ret.append("\n")
             ret += [indent] * next_indent_level
@@ -145,11 +161,14 @@ def add_lua_table(
             min_single_line_indent_level=min_single_line_indent_level,
             table_sort_key=table_sort_key,
             table_keys=table_keys,
+            table_item_prepend=table_item_prepend,
+            table_item_append=table_item_append,
         )
         if not one_line:
             ret.append(",")
         elif i < len(props) - 1:
             ret.append(", ")
+        ret.append(table_item_append(TableType.KEY_VALUE, prop, obj[prop], i))
     if not one_line:
         ret.append("\n")
         ret += [indent] * indent_level
@@ -165,6 +184,8 @@ def add_lua_code(
     min_single_line_indent_level,
     table_sort_key,
     table_keys,
+    table_item_prepend,
+    table_item_append,
 ):
     if obj is None:
         ret.append("nil")
@@ -185,6 +206,8 @@ def add_lua_code(
             min_single_line_indent_level=min_single_line_indent_level,
             table_sort_key=table_sort_key,
             table_keys=table_keys,
+            table_item_prepend=table_item_prepend,
+            table_item_append=table_item_append,
         )
     elif isinstance(obj, Iterable):
         add_lua_sequence(
@@ -195,9 +218,15 @@ def add_lua_code(
             min_single_line_indent_level=min_single_line_indent_level,
             table_sort_key=table_sort_key,
             table_keys=table_keys,
+            table_item_prepend=table_item_prepend,
+            table_item_append=table_item_append,
         )
     else:
         raise TypeError(f"Cannot serialize type {type(obj).__name__}")
+
+
+def return_blank_string(table_type, key, value, index):
+    return ""
 
 
 def serialize(
@@ -208,6 +237,8 @@ def serialize(
     min_single_line_indent_level=math.inf,
     table_sort_key=None,
     table_keys=TableKeyFormat.SHORT,
+    table_item_prepend=return_blank_string,
+    table_item_append=return_blank_string,
 ):
     """
     Serializes a Python object to a Lua table.
@@ -222,6 +253,18 @@ def serialize(
             keys of Lua tables. If not specified, the table is not sorted. For
             details of key functions, see
             https://docs.python.org/3/howto/sorting.html#key-functions.
+        table_keys (TableKeyFormat): Whether to use short table keys when
+            possible, or to use long-form table keys all the time.
+        table_item_prepend: A function to specify text to prepend to a table
+            key. Takes a TableType enum value, the key (or None for sequences),
+            the value, and the index of the table item in the table as
+            parameters, and should return the string to prepend as output.
+            Defaults to a function outputting the blank string.
+        table_item_prepend: A function to specify text to append to a table
+            key. Takes a TableType enum value, the key (or None for sequences),
+            the value, and the index of the table item in the table as
+            parameters, and should return the string to append as output.
+            Defaults to a function outputting the blank string.
 
     Returns:
         string: A serialized Lua data table string.
@@ -235,5 +278,7 @@ def serialize(
         table_keys=table_keys,
         min_single_line_indent_level=min_single_line_indent_level,
         table_sort_key=table_sort_key,
+        table_item_prepend=table_item_prepend,
+        table_item_append=table_item_append,
     )
     return "".join(ret)

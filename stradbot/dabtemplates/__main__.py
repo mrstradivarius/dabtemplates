@@ -36,31 +36,63 @@ def parse_options():
     return options
 
 
-def fetch_template_aliases(template_generator, excluded):
+def fetch_template_metadata(template_generator, excluded):
     """Fetch a list of disambiguation templates and their redirects."""
-    aliases = []
+    templates = []
     for page in template_generator:
         logging.info(f"Processing {page}")
         if page.title(with_ns=False) in excluded:
             continue
-        aliases.append(page.title(with_ns=False))
+        redirects = []
         for redirect in page.backlinks(
             follow_redirects=False,
             filter_redirects=True,
             namespaces=[10],
             content=False,
         ):
-            aliases.append(redirect.title(with_ns=False))
-    return aliases
+            redirects.append(redirect.title(with_ns=False))
+        redirects.sort()
+        templates.append(
+            {"template": page.title(with_ns=False), "redirects": redirects}
+        )
+    return templates
 
 
-def format_data_page(aliases):
+def fetch_top_comment(data_page):
+    top_comment = []
+    for line in data_page.text.split("\n"):
+        if line.startswith("--") or line == "":
+            top_comment.append(line)
+        else:
+            break
+    return "\n".join(top_comment).strip()
+
+
+def format_data_page(template_metadata, top_comment):
     """Format the list of disambiguation templates as a Lua module."""
+    templates = set(item["template"] for item in template_metadata)
+
+    def prepend_new_line_to_template_keys(table_type, key, value, index):
+        if (
+            table_type is lua_serializer.TableType.KEY_VALUE
+            and index > 0
+            and key in templates
+        ):
+            return "\n"
+        else:
+            return ""
+
+    keys = []
+    for item in template_metadata:
+        keys.append(item["template"])
+        keys += item["redirects"]
+
     lua_table = lua_serializer.serialize(
-        {alias: True for alias in aliases},
+        {key: True for key in keys},
         table_keys=lua_serializer.TableKeyFormat.FULL,
+        table_item_prepend=prepend_new_line_to_template_keys,
     )
-    return "return " + lua_table + "\n"
+    return top_comment + "\n\n" + "return " + lua_table + "\n"
 
 
 def format_edit_request_text(
@@ -93,13 +125,15 @@ def main():
     logging.info(f"Site: {site}")
 
     # Construct the new data module content
+    data_page = pywikibot.Page(site, title=options["data-page"])
     template_category = pywikibot.Category(site, title=options["cat"])
     logging.info(f"Fetch templates in {template_category} and their redirects")
-    template_aliases = fetch_template_aliases(
+    template_metadata = fetch_template_metadata(
         template_generator=pagegenerators.CategorizedPageGenerator(template_category),
         excluded=set(options["exclude"]),
     )
-    data_page_content = format_data_page(template_aliases)
+    top_comment = fetch_top_comment(data_page)
+    data_page_content = format_data_page(template_metadata, top_comment)
 
     # Check if the module sandbox content would change, and exit if not
     data_page_sandbox = pywikibot.Page(site, title=options["data-page-sandbox"])
@@ -114,7 +148,6 @@ def main():
     data_page_sandbox.save(options["data-page-sandbox-summary"], text=data_page_content)
 
     # Check if the module content would change, and exit if not
-    data_page = pywikibot.Page(site, title=options["data-page"])
     logging.info(f"Check if {data_page} content needs updating")
     if is_content_equal(data_page.text, data_page_content):
         logging.info(
