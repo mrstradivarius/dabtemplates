@@ -2,4 +2,4 @@
 
 {{edit fully-protected|$data_page|answered=no}}
 
-Bot comment: StradBot has detected that [[$data_page]] needs to be updated. This is due to a disambiguation template being added or removed from [[:$template_category]], or to a redirect to one of those templates being added or removed. The bot has saved the new page content in [[$data_page_sandbox]] ([https://en.wikipedia.org/w/index.php?title=Special:ComparePages&page1={{subst:urlencode:$data_page}}&page2={{subst:urlencode:$data_page_sandbox}} diff]). Please review this and update the module if necessary. ~~~~
+Bot comment: StradBot has detected that [[$data_page]] needs to be updated. This is due to a template being added or removed from [[:$template_category]], or to a redirect to one of those templates being added or removed. The bot has saved the new page content in [[$data_page_sandbox]] ([https://en.wikipedia.org/w/index.php?title=Special:ComparePages&page1={{subst:urlencode:$data_page}}&page2={{subst:urlencode:$data_page_sandbox}} diff]). Please review this and update the module if necessary. ~~~~
