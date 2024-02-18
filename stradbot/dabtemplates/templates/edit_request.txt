@@ -1,4 +1,4 @@
-== Request update of template list ($current_date) ==
+== Request update of $data_page ($current_date) ==
 
 {{edit fully-protected|$data_page|answered=no}}
 
