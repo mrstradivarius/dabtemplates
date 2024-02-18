@@ -11,3 +11,6 @@ throttle.ctrl
 # Note: user-config.py can contain OAuth secrets
 user-config.py
 user-password.py
+
+# IDE files
+.idea/
