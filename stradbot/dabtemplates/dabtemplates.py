@@ -132,6 +132,7 @@ def main():
     )
     top_comment = fetch_top_comment(data_page)
     data_page_content = format_data_page(template_metadata, top_comment)
+    logging.debug(f"Data page content:\n{data_page_content}")
 
     # Check if the module sandbox content would change, and exit if not
     data_page_sandbox = pywikibot.Page(site, title=options["data-page-sandbox"])
@@ -163,6 +164,7 @@ def main():
         data_page_sandbox,
         template_category,
     )
+    logging.debug(f"Edit request text:\n{edit_request_text}")
     data_talk_page.text = f"{data_talk_page.text.rstrip()}\n\n{edit_request_text}\n"
     data_talk_page.save(options["edit-request-summary"])
     logging.info(f"End dabtemplates task")
