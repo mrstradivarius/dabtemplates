@@ -44,7 +44,11 @@ def fetch_template_metadata(template_generator, excluded):
         redirects = []
         for redirect in page.redirects(namespaces=[10], content=False):
             redirects.append(redirect.title(with_ns=False))
-        redirects.sort()
+
+        # Sort the list. Sort case-insensitively, but fall back to default
+        # sort order if the case-insensitive strings are identical.
+        redirects.sort(key=lambda s: (s.casefold(), s))
+
         templates.append(
             {"template": page.title(with_ns=False), "redirects": redirects}
         )
