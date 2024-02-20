@@ -42,12 +42,7 @@ def fetch_template_metadata(template_generator, excluded):
         if page.title(with_ns=False) in excluded:
             continue
         redirects = []
-        for redirect in page.backlinks(
-            follow_redirects=False,
-            filter_redirects=True,
-            namespaces=[10],
-            content=False,
-        ):
+        for redirect in page.redirects(namespaces=[10], content=False):
             redirects.append(redirect.title(with_ns=False))
         redirects.sort()
         templates.append(
